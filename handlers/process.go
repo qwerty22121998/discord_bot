@@ -105,6 +105,7 @@ func (h *MusicHandler) Start() {
 			select {
 			case music := <-c.current:
 				func() {
+
 					zap.S().Infow("current signal", "title", music.Title, "url", music.Title)
 					file, err := parser.GetMusic(music.URL)
 					if err != nil {
