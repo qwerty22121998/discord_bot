@@ -9,4 +9,5 @@ type Music struct {
 	ChannelID string
 	Requester *discordgo.User
 	Session   *discordgo.Session
+	Connect   *discordgo.VoiceConnection
 }

@@ -30,7 +30,8 @@ func main() {
 		panic(err)
 	}
 	h := handlers.NewMusicHandler()
-	h.Start()
+	go h.Start()
+
 	d.AddHandler(h.Handle)
 
 	d.Identify.Intents = discordgo.IntentGuildMessages | discordgo.IntentGuildVoiceStates

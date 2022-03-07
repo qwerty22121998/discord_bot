@@ -5,6 +5,6 @@ import (
 )
 
 func (h *MusicHandler) handleSkip(s *discord.Session, q string, m *discord.Message) {
-	h.message(s, m.ChannelID, "", ":middle_finger: next bài")
-	h.control.skip <- true
+	message(s, m.ChannelID, "", ":middle_finger: next bài")
+	h.control.Skip()
 }

@@ -31,6 +31,11 @@ func NewMusicHandler() *MusicHandler {
 	}
 }
 
+
+func (h *MusicHandler) Start() {
+	h.control.Start()
+}
+
 func (h *MusicHandler) Join(s *discord.Session, gid, cid string) error {
 	voice, err := s.ChannelVoiceJoin(gid, cid, false, true)
 	if err != nil {
@@ -67,7 +72,7 @@ func (h *MusicHandler) getCurrentUserVoiceChannel(s *discord.Session, gid string
 	return "", "", ErrNoVoiceChannel(user.Username)
 }
 
-func (h *MusicHandler) message(s *discord.Session, cid, title, desc string) error {
+func message(s *discord.Session, cid, title, desc string) error {
 	_, err := s.ChannelMessageSendComplex(cid, &discord.MessageSend{
 		Embeds: []*discord.MessageEmbed{
 			{
