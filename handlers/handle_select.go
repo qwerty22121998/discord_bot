@@ -28,5 +28,5 @@ func (h *MusicHandler) handleSelect(s *discord.Session, q string, m *discord.Mes
 	list[order].Requester = m.Author
 	list[order].Session = s
 	list[order].Connect = h.voice
-	h.control.Add(&list[order])
+	h.addMusic(&list[order])
 }

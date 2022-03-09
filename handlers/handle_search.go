@@ -23,7 +23,7 @@ func (h *MusicHandler) handleSearch(s *discord.Session, q string, m *discord.Mes
 	}
 	h.cache.Set(m.Author.ID, musics)
 	message(s, m.ChannelID,
-		fmt.Sprintf(":love_you_gesture: Kết quả cho `%v` bởi `%v`\nChọn bài bằng cách `/play <order>`", q, m.Author.Username),
+		fmt.Sprintf(":love_you_gesture: Kết quả cho `%v` bởi `%v`\nChọn bài bằng cách `.play <order>`\nDanh sách chờ `.queue`", q, m.Author.Username),
 		content.String(),
 	)
 }
