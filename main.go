@@ -29,7 +29,8 @@ func main() {
 	if err := parser.InitParser(apiKey); err != nil {
 		panic(err)
 	}
-	h := handlers.NewMusicHandler()
+	h := handlers.NewMusicHandler(d)
+
 	go h.Start()
 
 	d.AddHandler(h.Handle)
