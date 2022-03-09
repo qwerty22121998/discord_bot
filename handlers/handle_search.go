@@ -9,12 +9,12 @@ import (
 
 func (h *MusicHandler) handleSearch(s *discord.Session, q string, m *discord.Message) {
 	if err := h.checkVoice(s, m.GuildID, m.Author); err != nil {
-		h.message(s, m.ChannelID, "Lỗi", err.Error())
+		message(s, m.ChannelID, "Lỗi", err.Error())
 		return
 	}
 	musics, err := parser.SearchMusic(q, 5)
 	if err != nil {
-		h.message(s, m.ChannelID, "Lỗi", err.Error())
+		message(s, m.ChannelID, "Lỗi", err.Error())
 		return
 	}
 	content := strings.Builder{}
@@ -22,8 +22,8 @@ func (h *MusicHandler) handleSearch(s *discord.Session, q string, m *discord.Mes
 		content.WriteString(fmt.Sprintf("**%d, [%v](%v)**\n", i+1, music.Title, music.URL))
 	}
 	h.cache.Set(m.Author.ID, musics)
-	h.message(s, m.ChannelID,
-		fmt.Sprintf(":love_you_gesture: Kết quả cho `%v` bởi `%v`\nChọn bài bằng cách `/play <order>`", q, m.Author.Username),
+	message(s, m.ChannelID,
+		fmt.Sprintf(":love_you_gesture: Kết quả cho `%v` bởi `%v`\nChọn bài bằng cách `.play <order>`\nDanh sách chờ `.queue`", q, m.Author.Username),
 		content.String(),
 	)
 }

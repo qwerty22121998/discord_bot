@@ -5,6 +5,8 @@ import (
 )
 
 func (h *MusicHandler) handleShuffle(s *discord.Session, q string, m *discord.Message) {
-	h.message(s, m.ChannelID, "", ":dizzy:")
-	h.control.shuffle <- true
+	h.shuffle()
+	message(s, m.ChannelID, "", ":dizzy: shuffle")
+	h.handleList(s, q, m)
+	//h.control.Shuffle()
 }

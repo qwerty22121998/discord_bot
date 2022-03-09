@@ -49,13 +49,7 @@ func GetMusic(url string) (io.ReadCloser, error) {
 		return nil, err
 	}
 	audioChannels := vid.Formats.WithAudioChannels()
-	var selectChannel ytdl.Format
-	for _, channel := range audioChannels {
-		if channel.AudioQuality == "AUDIO_QUALITY_MEDIUM" && channel.AudioSampleRate > selectChannel.AudioSampleRate {
-			selectChannel = channel
-		}
-	}
-	stream, _, err := dlClient.GetStream(vid, &selectChannel)
+	stream, _, err := dlClient.GetStream(vid, &audioChannels[0])
 	if err != nil {
 		return nil, err
 	}
