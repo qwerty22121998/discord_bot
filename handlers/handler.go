@@ -24,22 +24,24 @@ var (
 )
 
 type MusicHandler struct {
-	cache *selectCache
-	voice *discord.VoiceConnection
-
-	queue     []*dto.Music
-	muQue     sync.Mutex
-	playing   *dto.Music
-	muPlaying sync.Mutex
-	chanPlay  chan bool
-	chanSkip  chan bool
-	chanDone  chan bool
+	cache       *selectCache
+	voice       *discord.VoiceConnection
+	mainSession *discord.Session
+	queue       []*dto.Music
+	muQue       sync.Mutex
+	playing     *dto.Music
+	muPlaying   sync.Mutex
+	chanPlay    chan bool
+	chanSkip    chan bool
+	chanDone    chan bool
+	cmd         map[string]Command
 }
 
-func NewMusicHandler() *MusicHandler {
-	return &MusicHandler{
-		cache: newCache(),
-		voice: nil,
+func NewMusicHandler(mainSession *discord.Session) *MusicHandler {
+	h := &MusicHandler{
+		cache:       newCache(),
+		voice:       nil,
+		mainSession: mainSession,
 
 		queue:     make([]*dto.Music, 0),
 		muQue:     sync.Mutex{},
@@ -48,7 +50,37 @@ func NewMusicHandler() *MusicHandler {
 		chanPlay:  make(chan bool, 1024),
 		chanSkip:  make(chan bool),
 		chanDone:  make(chan bool),
+		cmd:       make(map[string]Command),
 	}
+	h.CreateCommand("search", "`.search <tên>` để tìm kiếm bài hát", h.handleSearch)
+	h.CreateCommand("play", "`.play <stt>` để chọn bài", h.handleSelect)
+	h.CreateCommand("skip", "`.skip` để skip bài hiện tại", h.handleSkip)
+	h.CreateCommand("queue", "`.queue` để hiện thị danh sách bài hát đang chờ", h.handleList)
+	h.CreateCommand("shuffle", "`.shuffle` để làm playlist hỗn loạn như crush làm với bạn", h.handleShuffle)
+	h.CreateCommand("restart", "`.restart` khởi động lại bot", func(s *discord.Session, q string, m *discord.Message) {
+		panic("restart")
+	})
+
+	h.CreateCommand("help", "`.help` hướng dẫn", func(s *discord.Session, q string, m *discord.Message) {
+		msg := strings.Builder{}
+		for _, cmd := range h.cmd {
+			msg.WriteString(cmd.Help())
+			msg.WriteString("\n")
+		}
+		message(s, m.ChannelID, "Hướng dẫn nèk", msg.String())
+	})
+
+	return h
+}
+
+func (h *MusicHandler) CreateCommand(cmd string, help string, handler func(s *discord.Session, q string, m *discord.Message)) {
+	newCmd := &command{
+		handler: handler,
+		command: cmd,
+		help:    help,
+	}
+
+	h.cmd[cmd] = newCmd
 }
 
 func (h *MusicHandler) Start() {
@@ -219,20 +251,26 @@ func (h *MusicHandler) Handle(s *discord.Session, m *discord.MessageCreate) {
 	if strings.HasPrefix(m.Content, CMDPrefix) {
 		cmd, arg := h.parseCommand(m.Content)
 		zap.S().Infow("receive command", "user", m.Author.Username, "command", cmd, "arg", arg)
-		switch cmd {
-		case "search":
-			h.handleSearch(s, arg, m.Message)
-		case "play":
-			h.handleSelect(s, arg, m.Message)
-		case "skip":
-			h.handleSkip(s, arg, m.Message)
-		case "shuffle":
-			h.handleShuffle(s, arg, m.Message)
-		case "queue":
-			h.handleList(s, arg, m.Message)
-			//case "test":
-			//	h.handleTest(s, arg, m.Message)
-			//}
+		exec, ok := h.cmd[cmd]
+		if !ok {
+			return
 		}
+
+		exec.Handler()(s, arg, m.Message)
+		//switch cmd {
+		//case "search":
+		//	h.handleSearch(s, arg, m.Message)
+		//case "play":
+		//	h.handleSelect(s, arg, m.Message)
+		//case "skip":
+		//	h.handleSkip(s, arg, m.Message)
+		//case "shuffle":
+		//	h.handleShuffle(s, arg, m.Message)
+		//case "queue":
+		//	h.handleList(s, arg, m.Message)
+		//case "test":
+		//	h.handleTest(s, arg, m.Message)
+		//}
 	}
+
 }
